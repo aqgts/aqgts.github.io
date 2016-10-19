@@ -1,0 +1,38 @@
+{
+  "name": "double-side-to-single-side",
+  "version": "0.1.0",
+  "description": "This tool converts double-sided materials of a PMX model to single-sided materials.",
+  "scripts": {
+    "build": "cp ../shared/src/* src && `npm bin`/babel -d dist src && `npm bin`/browserify dist/index.main.js | `npm bin`/uglifyjs -o dist/index.main.min.js",
+    "clean": "git clean -X -d -f",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/aqgts/aqgts.github.io.git"
+  },
+  "author": "aq",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/aqgts/aqgts.github.io/issues"
+  },
+  "homepage": "http://aqgts.github.io/double-side-to-single-side/",
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-3"
+    ]
+  },
+  "engines": {
+    "node": "^6.8.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-stage-3": "^6.17.0",
+    "browserify": "^13.1.0",
+    "color": "^0.11.3",
+    "uglify-js": "^2.7.3"
+  }
+}

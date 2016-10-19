@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>impact-earthquake</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1>impact-earthquake</h1>
+          <form class="well">
+            <div class="form-group">
+              <label for="fps">MMDのFPS</label>
+              <input type="text" value="30" class="form-control" id="fps" />
+            </div>
+            <div class="form-group">
+              <label for="time">モーション生成秒数[秒]（(FPS×この数字)フレームだけのモーションデータが生成されます）</label>
+              <input type="text" value="10" class="form-control" id="time" />
+            </div>
+            <div class="form-group">
+              <label for="modelName">振動させるモデル名</label>
+              <input type="text" value="ダミーボーン" class="form-control" id="modelName" />
+            </div>
+            <div class="form-group">
+              <label for="boneName">振動させるボーン名</label>
+              <input type="text" value="ﾎﾞｰﾝ01" class="form-control" id="boneName" />
+            </div>
+            <div class="form-group">
+              <label for="offsets">地震の発生開始時刻[秒]（カンマ区切りで複数の地震を表現できます）</label>
+              <input type="text" value="0, 0.8, 1.6, 2.4, 3.2, 4, 4.8, 5.6, 6.4" class="form-control" id="offsets" />
+            </div>
+            <div class="form-group">
+              <label for="amplitudes">振幅パラメータ（カンマ区切りで複数の地震を表現できます）</label>
+              <input type="text" value="0.07, 0.075, 0.08, 0.085, 0.09, 0.10, 0.12, 0.15, 0.20" class="form-control" id="amplitudes" />
+            </div>
+            <div class="form-group">
+              <label for="period">地震の揺れの周期[秒]</label>
+              <input type="text" value="0.2" class="form-control" id="period" />
+            </div>
+            <div class="form-group">
+              <label for="halfLife">地震の揺れの半減期[秒]</label>
+              <input type="text" value="0.15" class="form-control" id="halfLife" />
+            </div>
+            <div class="form-group">
+              <input type="button" value="VMD生成" disabled class="btn btn-primary" id="run" />
+            </div>
+            <div class="form-group">
+              <label for="log">システムからのメッセージ</label>
+              <textarea rows="4" readonly class="form-control" id="log"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="view">生成された振動を簡易的に確認（横軸が時間、縦軸がY方向の振幅）</label>
+              <div><canvas width="500" height="400" id="view"></canvas></div>
+            </div>
+          </form>
+          <section>
+            <h2>説明</h2>
+            <p>
+              impact-earthquakeは、重い物体が落下した時のような、瞬間的に強くなって徐々に減衰していく地震のモーションを作ることができるツールです。<br />
+              VMD生成ボタンを押すことで、MMD用のモーションデータであるVMDファイルを生成します。
+            </p>
+          </section>
+          <section>
+            <h2>おすすめの使い方</h2>
+            <p>使用にあたっては、以下のような手順を踏むのがおすすめです。</p>
+            <ol>
+              <li>MMD付属のダミーボーン.pmdを読み込む</li>
+              <li>ダミーボーンに本ツールで生成した地震モーションを適用する</li>
+              <li>振動させたい街やモブモデルの外部親としてダミーボーンを登録する</li>
+            </ol>
+            <p>画像付きで詳しく説明します。</p>
+            <section>
+              <h3>MMD付属のダミーボーン.pmdを読み込む</h3>
+              <p>
+                モデル操作パネルからダミーボーン.pmdを読み込みます。<br />
+                <img src="resources/1-1.png" alt="" />
+              </p>
+              <p>
+                ダミーボーン.pmdは「MikuMikuDance_v926x64\UserFile\Model\ダミーボーン.pmd」の場所にあります。<br />
+                <img src="resources/1-2.png" alt="" />
+              </p>
+            </section>
+            <section>
+              <h3>ダミーボーンに本ツールで生成した地震モーションを適用する</h3>
+              <p>
+                ダミーボーン.pmdを読み込んだらそのままモーションデータを読み込みます。<br />
+                <img src="resources/2-1.png" alt="" />
+              </p>
+              <p>
+                読み込むモーションデータは本ツールで生成したvmdファイルです。<br />
+                <img src="resources/2-2.png" alt="" />
+              </p>
+              <p>
+                画像のようにキーフレームがずらっと並んだら成功です。<br />
+                <img src="resources/2-3.png" alt="" />
+              </p>
+            </section>
+            <section>
+              <h3>振動させたい街やモブモデルの外部親としてダミーボーンを登録する</h3>
+              <p>
+                モデルの外部親登録はモデル操作パネルの「外」ボタンから行います。<br />
+                <img src="resources/3-1.png" alt="" />
+              </p>
+              <p>
+                画像のように設定して「外親登録」ボタンを押します。<br />
+                <img src="resources/3-2.png" alt="" />
+              </p>
+              <p>
+                アクセサリの外部親登録はアクセサリ操作パネルの画像のプルダウンから行います。<br />
+                登録ボタンを忘れずに押すようにしてください。<br />
+                <img src="resources/3-3.png" alt="" />
+              </p>
+            </section>
+          </section>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.4/lodash.min.js" integrity="sha384-+VyieUXwWQSImpRIFhlRJNe2KeZblzwXEF8LsYAO/cYlQdDG2SdJaky4Ud0sdVup" crossorigin="anonymous"></script>
+    <script>window.TextEncoder = window.TextDecoder = null;</script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding-indexes.js" integrity="sha384-jWeRIUy7EaXFr9y2w3mAhEyNfcErQLwCwU4aoaPa7RnQW2/hhjhlOKy2k5AWwvNq" crossorigin="anonymous"></script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding.js" integrity="sha384-8ADKk0uZNRtvTx93m1oAfpvp5c/+nqSVWFhhSTntUcN3b+flD1Ljgy0cYuRS9sGk" crossorigin="anonymous"></script>
+    <script src="dist/index.main.min.js?1476842250"></script>
+  </body>
+</html>
