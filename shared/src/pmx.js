@@ -389,11 +389,11 @@ PMX.Material = class Material {
       blue: utils.readFloat32(io)
     };
     const bitFlag = utils.readUint8(io);
-    const isDoubleSided = bitFlag & 0x01 == 0x01;
-    const rendersGroundShadow = bitFlag & 0x02 == 0x02;
-    const makesSelfShadow = bitFlag & 0x04 == 0x04;
-    const rendersSelfShadow = bitFlag & 0x08 == 0x08;
-    const rendersEdge = bitFlag & 0x10 == 0x10;
+    const isDoubleSided = (bitFlag & 0x01) == 0x01;
+    const rendersGroundShadow = (bitFlag & 0x02) == 0x02;
+    const makesSelfShadow = (bitFlag & 0x04) == 0x04;
+    const rendersSelfShadow = (bitFlag & 0x08) == 0x08;
+    const rendersEdge = (bitFlag & 0x10) == 0x10;
     const edge = {
       red: utils.readFloat32(io),
       green: utils.readFloat32(io),
