@@ -1,6 +1,5 @@
 import "babel-polyfill";
 import "./lodash-extension";
-import Color from "color";
 import Vector2 from "./vector2";
 import Vector3 from "./vector3";
 import Vector4 from "./vector4";
@@ -346,11 +345,9 @@ PMX.Material = class Material {
   write(io, utils) {
     utils.writeTextBuffer(io, this.japaneseName);
     utils.writeTextBuffer(io, this.englishName);
-    utils.writeFloat32Array(io, this.diffuse.rgbArray().map(c => c / 255));
-    utils.writeFloat32(io, this.diffuse.alpha());
-    utils.writeFloat32Array(io, this.specular.color.rgbArray().map(c => c / 255));
-    utils.writeFloat32(io, this.specular.coefficient);
-    utils.writeFloat32Array(io, this.ambient.rgbArray().map(c => c / 255));
+    utils.writeFloat32Array(io, [this.diffuse.red, this.diffuse.green, this.diffuse.blue, this.diffuse.alpha]);
+    utils.writeFloat32Array(io, [this.specular.red, this.specular.green, this.specular.blue, this.specular.coefficient]);
+    utils.writeFloat32Array(io, [this.ambient.red, this.ambient.green, this.ambient.blue]);
     utils.writeUint8(io,
       (this.isDoubleSided ? 0x01 : 0x00) |
       (this.rendersGroundShadow ? 0x02 : 0x00) |
@@ -358,9 +355,7 @@ PMX.Material = class Material {
       (this.rendersSelfShadow ? 0x08 : 0x00) |
       (this.rendersEdge ? 0x10 : 0x00)
     );
-    utils.writeFloat32Array(io, this.edge.color.rgbArray().map(c => c / 255));
-    utils.writeFloat32(io, this.edge.color.alpha());
-    utils.writeFloat32(io, this.edge.size);
+    utils.writeFloat32Array(io, [this.edge.red, this.edge.green, this.edge.blue, this.edge.alpha, this.edge.size]);
     utils.writeTextureIndex(io, this.textureIndex);
     utils.writeTextureIndex(io, this.sphereTexture.index);
     utils.writeUint8(io, {disabled: 0, multiply: 1, add: 2, subTexture: 3}[this.sphereTexture.mode]);
@@ -376,12 +371,23 @@ PMX.Material = class Material {
   static read(io, utils) {
     const japaneseName = utils.readTextBuffer(io);
     const englishName = utils.readTextBuffer(io);
-    const diffuse = new Color().rgb(utils.readFloat32Array(io, 3).map(c => c * 255)).alpha(utils.readFloat32(io));
+    const diffuse = {
+      red: utils.readFloat32(io),
+      green: utils.readFloat32(io),
+      blue: utils.readFloat32(io),
+      alpha: utils.readFloat32(io)
+    };
     const specular = {
-      color: new Color().rgb(utils.readFloat32Array(io, 3).map(c => c * 255)),
+      red: utils.readFloat32(io),
+      green: utils.readFloat32(io),
+      blue: utils.readFloat32(io),
       coefficient: utils.readFloat32(io)
     };
-    const ambient = new Color().rgb(utils.readFloat32Array(io, 3).map(c => c * 255));
+    const ambient = {
+      red: utils.readFloat32(io),
+      green: utils.readFloat32(io),
+      blue: utils.readFloat32(io)
+    };
     const bitFlag = utils.readUint8(io);
     const isDoubleSided = bitFlag & 0x01 == 0x01;
     const rendersGroundShadow = bitFlag & 0x02 == 0x02;
@@ -389,7 +395,10 @@ PMX.Material = class Material {
     const rendersSelfShadow = bitFlag & 0x08 == 0x08;
     const rendersEdge = bitFlag & 0x10 == 0x10;
     const edge = {
-      color: new Color().rgb(utils.readFloat32Array(io, 3).map(c => c * 255)).alpha(utils.readFloat32(io)),
+      red: utils.readFloat32(io),
+      green: utils.readFloat32(io),
+      blue: utils.readFloat32(io),
+      alpha: utils.readFloat32(io),
       size: utils.readFloat32(io)
     };
     const textureIndex = utils.readTextureIndex(io);
