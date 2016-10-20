@@ -1,0 +1,38 @@
+{
+  "name": "aqgts-shared",
+  "version": "1.0.0",
+  "description": "Shared files for all my applications.",
+  "scripts": {
+    "build": "find .. -mindepth 1 -maxdepth 1 -type d '!' -name shared | xargs -I{} bash -c 'cd {} && if [ -f package.json ]; then npm run build; fi'",
+    "clean": "git clean -X -d -f",
+    "test": "`npm bin`/babel -d dist src spec && `npm bin`/jasmine-node dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/aqgts/aqgts.github.io.git"
+  },
+  "author": "aq",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/aqgts/aqgts.github.io/issues"
+  },
+  "homepage": "https://github.com/aqgts/aqgts.github.io",
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-3"
+    ]
+  },
+  "engines": {
+    "node": "^6.8.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-polyfill": "^6.16.0",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-stage-3": "^6.17.0",
+    "jasmine-node": "^1.14.5",
+    "lodash": "^4.16.4",
+    "text-encoding": "^0.6.1"
+  }
+}
