@@ -6,7 +6,11 @@ export default class VMD {
     this.modelName = modelName;
     this.keyFrames = keyFrames;
   }
-  write(io) {
+  write() {
+    const io = {
+      view: new DataView(new ArrayBuffer(4096)),
+      offset: 0
+    };
     Packer.writeNullTerminatedString(io, "Vocaloid Motion Data 0002", 30, "shift_jis");
     if (this.modelName == CAMERA_MODEL_NAME) {
       Packer.writeString(io, CAMERA_MODEL_NAME, "shift_jis");
@@ -39,6 +43,7 @@ export default class VMD {
     this.keyFrames.showIK.forEach(keyFrame => {
       keyFrame.write(io);
     });
+    return new Uint8Array(io.view.buffer, 0, io.offset);
   }
 }
 VMD.BoneKeyFrame = class BoneKeyFrame {

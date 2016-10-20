@@ -37,7 +37,11 @@ export default class PMX {
       this.header.rigidBodyIndexSize
     );
   }
-  write(io) {
+  write() {
+    const io = {
+      view: new DataView(new ArrayBuffer(4096)),
+      offset: 0
+    };
     this.establishConsistency();
     const utils = new PMX.Utils(this.header);
     utils.writeString(io, "PMX ", "utf-8");
@@ -61,8 +65,13 @@ export default class PMX {
       material.write(io, utils);
     });
     utils.writeUint8Array(io, this.unknown);
+    return new Uint8Array(io.view.buffer, 0, io.offset);
   }
-  static read(io) {
+  static read(binary) {
+    const io = {
+      view: new DataView(binary.buffer, 0, binary.byteLength),
+      offset: 0
+    };
     if (Packer.readString(io, 4, "utf-8") != "PMX ") throw new Error("Not PMX.");
     if (Packer.readFloat32(io) != 2.0) throw new Error("Incompatible version.");
     const header = this.Header.read(io);

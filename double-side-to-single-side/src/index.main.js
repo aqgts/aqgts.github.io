@@ -8,11 +8,11 @@ function log(message) {
   });
 }
 
-function getIO(inputFile) {
+function getBinary(inputFile) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = event => {
-      resolve({view: new DataView(event.target.result), offset: 0})
+      resolve(new Uint8Array(event.target.result))
     };
     reader.onerror = error => {
       reject(error);
@@ -23,9 +23,9 @@ function getIO(inputFile) {
 
 const main = async function (inputFile) {
   await log("モデル読み込み中...");
-  const readIO = await getIO(inputFile);
+  const binary = await getBinary(inputFile);
   await log("モデル解析中...");
-  const model = PMX.read(readIO);
+  const model = PMX.read(binary);
   const originalVertexIndexSize = model.header.vertexIndexSize;
   await log(`変換前頂点数: ${model.vertices.length}`);
 
@@ -88,9 +88,7 @@ const main = async function (inputFile) {
   }
 
   await log("モデル書き出し中...");
-  const writeIO = {view: new DataView(new ArrayBuffer(readIO.view.byteLength * 2)), offset: 0};
-  model.write(writeIO);
-  return new Blob([new Uint8Array(writeIO.view.buffer, 0, writeIO.offset)], {type: "application/octet-stream"});
+  return new Blob([model.write()], {type: "application/octet-stream"});
 }
 
 $("#run").click(async () => {

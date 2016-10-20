@@ -1,6 +1,6 @@
 function extend(io) {
   const newBuffer = new ArrayBuffer(io.view.byteLength * 2);
-  new Uint8Array(newBuffer).set(new Uint8Array(io.view.buffer));
+  new Uint8Array(newBuffer).set(new Uint8Array(io.view.buffer, 0, io.view.byteLength));
   io.view = new DataView(newBuffer);
 }
 

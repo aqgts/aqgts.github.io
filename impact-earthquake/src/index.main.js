@@ -43,13 +43,6 @@ const getMotion = async function (fps, time, modelName, boneName, infoPieces, pe
   });
 };
 
-const getBlob = async function (motion) {
-  await log("モーション書き出し中...");
-  const writeIO = {view: new DataView(new ArrayBuffer(4096)), offset: 0};
-  motion.write(writeIO);
-  return new Blob([new Uint8Array(writeIO.view.buffer, 0, writeIO.offset)], {type: "application/octet-stream"});
-}
-
 $("#run").click(async () => {
   try {
     $("#log").val("");
@@ -78,7 +71,10 @@ $("#run").click(async () => {
     if (isNaN(halfLife)) throw new Error("揺れの半減期の値が数字ではありません");
 
     const motion = await getMotion(fps, time, modelName, boneName, infoPieces, period, halfLife);
-    const blob = await getBlob(motion);
+
+    await log("モーション書き出し中...");
+    const blob = new Blob([motion.write()], {type: "application/octet-stream"});
+
     await log("モーションデータの生成に成功しました");
 
     context.strokeStyle = "#ff0000";
