@@ -18,7 +18,7 @@
               <input type="file" value="ファイル選択" accept=".pmx" class="form-control" id="inputFile" />
             </div>
             <div class="form-group">
-              <input type="button" value="変換実行" class="btn btn-primary" id="run" />
+              <input type="button" value="変換実行" disabled class="btn btn-primary" id="run" />
             </div>
             <div class="form-group">
               <label for="log">システムからのメッセージ</label>
@@ -47,12 +47,10 @@
           </section>
           <section>
             <h2>既知の不具合</h2>
-            <ul>
-            <li>変換前頂点数が0～255で、かつ変換後頂点数が256以上になる場合、変換を実行できない</li>
-            <li>変換前頂点数が256～65535で、かつ変換後頂点数が65536以上になる場合、変換を実行できない</li>
-            <li>変換後のモデルで一部のモーフがうまく動作しない</li>
-            </ul>
-            <p>これらの問題には将来的に対応するかもしれません。</p>
+            <p>
+              変換後、一部モデルの見た目がおかしくなることがあります。<br />
+              原因は今のところ不明です。
+            </p>
           </section>
         </div>
       </div>
@@ -63,6 +61,6 @@
     <script>window.TextEncoder = window.TextDecoder = null;</script>
     <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding-indexes.js" integrity="sha384-jWeRIUy7EaXFr9y2w3mAhEyNfcErQLwCwU4aoaPa7RnQW2/hhjhlOKy2k5AWwvNq" crossorigin="anonymous"></script>
     <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding.js" integrity="sha384-8ADKk0uZNRtvTx93m1oAfpvp5c/+nqSVWFhhSTntUcN3b+flD1Ljgy0cYuRS9sGk" crossorigin="anonymous"></script>
-    <script src="dist/index.main.min.js?1476954436"></script>
+    <script src="dist/index.main.min.js?1477074613"></script>
   </body>
 </html>

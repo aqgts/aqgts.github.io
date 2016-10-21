@@ -1,6 +1,6 @@
 {
   "name": "double-side-to-single-side",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "This tool converts double-sided materials of a PMX model to single-sided materials.",
   "scripts": {
     "build": "cp ../shared/src/* src && `npm bin`/babel -d dist src && `npm bin`/browserify dist/index.main.js | `npm bin`/uglifyjs -o dist/index.main.min.js",

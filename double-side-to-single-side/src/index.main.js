@@ -26,8 +26,6 @@ const main = async function (inputFile) {
   const binary = await getBinary(inputFile);
   await log("モデル解析中...");
   const model = PMX.read(binary);
-  const originalVertexIndexSize = model.header.vertexIndexSize;
-  await log(`変換前頂点数: ${model.vertices.length}`);
 
   await log("モデル変換中...");
 
@@ -74,18 +72,30 @@ const main = async function (inputFile) {
   });
   model.faces = _.flatMap(faceObjs, faceObj => faceObj.faces);
 
-  await log(`変換後頂点数: ${model.vertices.length}`);
-
-  await log("モデルの整合性確認中...");
-  model.establishConsistency();
-  if (model.header.vertexIndexSize > originalVertexIndexSize) {
-    switch (originalVertexIndexSize) {
-    case 1:
-      throw new Error("現在のバージョンでは、変換前頂点数が0～255で、かつ変換後頂点数が256以上になる場合、変換を実行できません。");
-    case 2:
-      throw new Error("現在のバージョンでは、変換前頂点数が256～65535で、かつ変換後頂点数が65536以上になる場合、変換を実行できません。");
+  model.morphs.forEach(morph => {
+    switch (morph.type) {
+    case "vertex":
+      morph.offsets.filter(offset => vertexIndexMap.has(offset.vertexIndex)).forEach(offset => {
+        morph.offsets.push(new PMX.Morph.Offset.Vertex(
+          vertexIndexMap.get(offset.vertexIndex),
+          offset.displacement
+        ));
+      });
+      break;
+    case "uv":
+    case "extraUV1":
+    case "extraUV2":
+    case "extraUV3":
+    case "extraUV4":
+      morph.offsets.filter(offset => vertexIndexMap.has(offset.vertexIndex)).forEach(offset => {
+        morph.offsets.push(new PMX.Morph.Offset.UV(
+          vertexIndexMap.get(offset.vertexIndex),
+          offset.displacement
+        ));
+      });
+      break;
     }
-  }
+  });
 
   await log("モデル書き出し中...");
   return new Blob([model.write()], {type: "application/octet-stream"});
@@ -112,4 +122,8 @@ $("#run").click(async () => {
   } catch (error) {
     await log(`[Error]${error}`)
   }
+});
+
+$(() => {
+  $("#run").prop("disabled", false);
 });

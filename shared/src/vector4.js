@@ -1,4 +1,5 @@
 import Vector from "./vector";
+import Quaternion from "./quaternion";
 
 export default class Vector4 extends Vector {
   constructor(x, y, z, w) {
@@ -27,5 +28,8 @@ export default class Vector4 extends Vector {
   }
   set w(value) {
     this[3] = value;
+  }
+  toQuaternion() {
+    return new Quaternion(this.w, this.x, this.y, this.z);
   }
 }

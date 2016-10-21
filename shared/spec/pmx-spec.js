@@ -12,6 +12,14 @@ describe("PMX", () => {
     }
     const model = PMX.read(inputUint8Array);
     const outputUint8Array = model.write();
-    expect(outputUint8Array).toEqual(inputUint8Array);
+    expect(inputUint8Array.length).toBe(1262210);
+    expect(outputUint8Array.length).toBe(1262210);
+    expect(() => {
+      for (let i = 0; i < 1262210; i++) {
+        if (outputUint8Array[i] != inputUint8Array[i]) {
+          throw new Error(`${i + 1}バイト目: Expected ${outputUint8Array[i]} to be ${inputUint8Array[i]}`);
+        }
+      }
+    }).not.toThrow();
   });
 });
