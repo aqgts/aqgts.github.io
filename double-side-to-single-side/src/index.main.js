@@ -30,7 +30,7 @@ const main = async function (inputFile) {
   await log("モデル変換中...");
 
   const faceObjs = model.materials.reduce((array, material) => {
-    const last = array.length == 0 ? 0 : _.last(_.last(array).indexRange);
+    const last = array.length == 0 ? 0 : _(_(array).last().indexRange).last() + 1;
     array.push({
       material: material,
       indexRange: _.range(last, last + material.faceCount)
