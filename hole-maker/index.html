@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>hole-maker（α版）</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s
+      }
+      .fade-enter, .fade-leave-active {
+        opacity: 0
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1>hole-maker</h1>
+          <div class="well">
+            <div class="well">
+              <div class="form-group">
+                <label for="cityFile">街モデル</label>
+                <input type="file" value="ファイル選択" accept=".pmx" class="form-control" id="cityFile" v-on:change="updateCityFile($event)">
+              </div>
+              <div class="form-inline">
+                <div class="form-group">
+                  <label for="cityX">X</label>
+                  <input type="text" size="5" class="form-control" id="cityX" v-model="cityX">
+                </div>
+                <div class="form-group">
+                  <label for="cityY">Y</label>
+                  <input type="text" size="5" class="form-control" id="cityY" v-model="cityY">
+                </div>
+                <div class="form-group">
+                  <label for="cityZ">Z</label>
+                  <input type="text" size="5" class="form-control" id="cityZ" v-model="cityZ">
+                </div>
+                <div class="form-group">
+                  <label for="cityRx">Rx</label>
+                  <input type="text" size="5" class="form-control" id="cityRx" v-model="cityRx">
+                </div>
+                <div class="form-group">
+                  <label for="cityRy">Ry</label>
+                  <input type="text" size="5" class="form-control" id="cityRy" v-model="cityRy">
+                </div>
+                <div class="form-group">
+                  <label for="cityRz">Rz</label>
+                  <input type="text" size="5" class="form-control" id="cityRz" v-model="cityRz">
+                </div>
+              </div>
+            </div>
+            <div class="well">
+              <div class="form-group">
+                <label for="footprintFile">足跡モデル</label>
+                <input type="file" value="ファイル選択" accept=".pmx" class="form-control" id="footprintFile" v-on:change="updateFootprintFile($event)">
+              </div>
+              <div class="form-inline">
+                <div class="form-group">
+                  <label for="footprintX">X</label>
+                  <input type="text" size="5" class="form-control" id="footprintX" v-model="footprintX">
+                </div>
+                <div class="form-group">
+                  <label for="footprintY">Y</label>
+                  <input type="text" size="5" class="form-control" id="footprintY" v-model="footprintY">
+                </div>
+                <div class="form-group">
+                  <label for="footprintZ">Z</label>
+                  <input type="text" size="5" class="form-control" id="footprintZ" v-model="footprintZ">
+                </div>
+                <div class="form-group">
+                  <label for="footprintRx">Rx</label>
+                  <input type="text" size="5" class="form-control" id="footprintRx" v-model="footprintRx">
+                </div>
+                <div class="form-group">
+                  <label for="footprintRy">Ry</label>
+                  <input type="text" size="5" class="form-control" id="footprintRy" v-model="footprintRy">
+                </div>
+                <div class="form-group">
+                  <label for="footprintRz">Rz</label>
+                  <input type="text" size="5" class="form-control" id="footprintRz" v-model="footprintRz">
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="thresholdY">断面の高さY</label>
+              <input type="text" class="form-control" id="thresholdY" v-model="thresholdY">
+            </div>
+            <div class="form-group">
+              <label for="firstStepLog">システムからのメッセージ</label>
+              <textarea rows="8" readonly class="form-control" id="firstStepLog">街モデルと足跡モデルと断面の高さYの設定をしてから、消去領域の算出ボタンを押してください</textarea>
+            </div>
+            <button class="btn btn-primary" v-bind:disabled="!isLoaded || isProcessing" v-on:click="calcCrossSection">消去領域の算出</button>
+          </div>
+          <transition name="fade">
+            <div class="well" v-show="hasBeenCalculated">
+              <div class="form-group">
+                <label for="preview">消去領域のプレビュー</label>
+                <div><canvas width="400" height="400" id="preview"></canvas></div>
+              </div>
+              <div class="form-group">
+                <div class="radio" v-if="polygonMap.get(true).length === 1">
+                  <label>
+                    <input type="radio" value="red" v-model="color">
+                    赤線で囲まれた領域を消す
+                  </label>
+                </div>
+                <div class="radio" v-if="polygonMap.get(false).length === 1">
+                  <label>
+                    <input type="radio" value="blue" v-model="color">
+                    青線で囲まれた領域を消す
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="secondStepLog">システムからのメッセージ</label>
+                <textarea rows="8" readonly class="form-control" id="secondStepLog"></textarea>
+              </div>
+              <button class="btn btn-primary" v-bind:disabled="!isLoaded || isProcessing || !hasAcceptablePolygons" v-on:click="eraseCrossSection">指定領域の消去</button>
+            </div>
+          </transition>
+          <section>
+            <h2>説明</h2>
+            <p>
+              hole-makerは、街モデルに足跡モデル型の穴を開けるモデル改造ツールです。<br>
+              使用の際は、街モデル側の利用規約をよく読み、モデル改造が許可されていることを確認してください。
+            </p>
+            <p>
+              本説明において、街モデルとは、銀匙Pの<a href="http://www.nicovideo.jp/watch/sm17708792">銀匙湾</a>や、SkyBlue氏の<a href="http://www.nicovideo.jp/watch/sm19376319">空色町</a>などの、広域系の背景モデルのことを指します。<br>
+              また、本説明において、足跡モデルとは、SS氏の<a href="http://acesces.cocolog-nifty.com/blog/2014/01/post-4220.html">モーションセット同梱靴あとモデル</a>や、おみず氏の<a href="https://twitter.com/gts_omizu/status/648100707959115777">足跡モデル</a>などの、下にへこんでいる形状を持つモデルのことを指します。<br>
+              （なお、厳密には「モデル」という言葉は、拡張子がpmdまたはpmxとなっている形式のファイルのみに使われ、「アクセサリ」という言葉は、拡張子がxとなっている形式のファイルのみに使われるのですが、本ページでは説明の単純化のため、これらをまとめて「モデル」という言葉で表記します）
+            </p>
+            <section>
+              <h3>本ツールが作られた背景</h3>
+              <p>
+                足跡モデルを特に何も考えずに作ると、街モデルと組み合わせて使う際、足跡モデルのへこんでいる部分が街モデルの地面よりも下に隠れてしまうという問題が起きることが知られています。
+              </p>
+              <table class="table">
+                <thead><tr>
+                  <th>街モデル</th>
+                  <th>足跡モデル</th>
+                  <th>街モデル+足跡モデル</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td><img src="resources/1-1.png" alt="街モデルです。" class="img-rounded"></td>
+                  <td><img src="resources/1-2.png" alt="足跡モデルです。" class="img-rounded"></td>
+                  <td><img src="resources/1-3.png" alt="足跡モデルの一部が街モデルの地面に隠されてしまっています。" class="img-rounded"></td>
+                </tr></tbody>
+              </table>
+              <p>
+                そこで、足跡モデルの作者は従来より、あるテクニックを用いてモデルを作ることでこの問題を回避してきました。<br>
+                それは、足跡モデルの、地面よりもへこんでいる部分の少し上に、ほとんど透明な蓋をすることです。
+              </p>
+              <table class="table">
+                <thead><tr>
+                  <th>ほとんど透明な蓋を作った足跡モデル</th>
+                  <th>蓋部分を強調した画像</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td><img src="resources/2-1.png" alt="ほとんど透明な蓋をした足跡モデルです。" class="img-rounded"></td>
+                  <td><img src="resources/2-2.png" alt="足跡モデルの蓋部分を強調した画像です。" class="img-rounded"></td>
+                </tr></tbody>
+              </table>
+              <p>
+                この蓋を作った足跡モデルは、MMDの描画順序設定を足跡モデル→街モデルの順にすることで、街モデルの地面に隠れてしまう部分を表示することができます。<br>
+                何故そのようになるかの深い説明はここではしませんが、MMDの半透明面の描画仕様をうまく使ったトリックと言えるでしょう。
+              </p>
+              <table class="table">
+                <thead><tr>
+                  <th>街モデル+ほとんど透明な蓋を作った足跡モデル</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td><img src="resources/3-1.png" alt="足跡モデルが街モデルの地面によって隠されていません。" class="img-rounded"></td>
+                </tr></tbody>
+              </table>
+              <p>
+                この手法はとても強力で手軽ですが、同時に限界も存在します。<br>
+                それは一部エフェクトとの相性が悪いことと、足跡から背の高い物体がはみ出すことがあることです。
+              </p>
+              <table class="table">
+                <thead><tr>
+                  <th>ビームマンPの<a href="http://www.nicovideo.jp/watch/sm18482017">NewBom</a>が蓋を境に消えてしまう</th>
+                  <th>蓋よりも上にある生垣や木が消えずに残ってしまう</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td><img src="resources/4-1.png" alt="一部エフェクトとの相性が悪い例です。" class="img-rounded"></td>
+                  <td><img src="resources/4-2.png" alt="足跡から背の高い物体がはみ出す例です。" class="img-rounded"></td>
+                </tr></tbody>
+              </table>
+              <p>
+                これらの問題を本質的に解決するためには、街モデルそのものに足跡モデル型の穴を開ける改造をしてしまうことが有効です。<br>
+                この改造を行った街モデルと併用する場合には、もはや足跡モデルにほとんど透明な蓋は必要ではありません。
+              </p>
+              <table class="table">
+                <thead><tr>
+                  <th>足跡モデル型の穴を開けた街モデル1</th>
+                  <th>足跡モデル型の穴を開けた街モデル2</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td><img src="resources/5-1.png" alt="足跡モデル型の穴を開けた街モデルです。" class="img-rounded"></td>
+                  <td><img src="resources/5-2.png" alt="足跡モデル型の穴を開けた街モデルです。" class="img-rounded"></td>
+                </tr></tbody>
+              </table>
+              <table class="table">
+                <thead><tr>
+                  <th>蓋が無いのでNewBomは蓋を境に消えることもない</th>
+                  <th>生垣や木はモデル改造で消えている</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td><img src="resources/6-1.png" alt="モデル改造が有効に働く例です。" class="img-rounded"></td>
+                  <td><img src="resources/6-2.png" alt="モデル改造が有効に働く例です。" class="img-rounded"></td>
+                </tr></tbody>
+              </table>
+              <p>
+                しかし、この手法がとられてくることは今日までほとんどありませんでした。<br>
+                街モデルに足跡モデル型の穴を開ける改造をすることは、非常に困難なことなのです。
+              </p>
+              <p>
+                この困難な作業を代行するために本ツールは作られました。<br>
+                本ツールは穴開け改造をほとんど自動で実行し、街モデルに足跡モデル型の穴を開ける手法への道を開きます。
+              </p>
+            </section>
+            <section>
+              <h3>本ツールを使うための事前準備</h3>
+              <p>
+                本ツールを使う前に、利用者側でいくつか準備しておくことがあります。<br>
+                それは、以下の3つです。
+              </p>
+              <ol>
+                <li>モデルがpmd形式やx形式である場合、pmx形式に変換する</li>
+                <li>足跡モデルにほとんど透明な蓋がある場合、蓋を取り除く</li>
+                <li>MMD上で街モデルと足跡モデルを仮に配置する</li>
+              </ol>
+              <p>
+                順に説明します。
+              </p>
+              <section>
+                <h4>モデルがpmd形式やx形式である場合、pmx形式に変換する</h4>
+                <p>
+                  本ツールは今のところpmx形式のモデルにしか対応していません。<br>
+                  そのため、事前に街モデルと足跡モデルをpmx形式に変換しておく必要があります。
+                </p>
+                <p>
+                  変換には極北Pの<a href="http://kkhk22.seesaa.net/category/14045227-1.html">PmxEditor</a>を使用します。<br>
+                  pmd形式の場合、ファイルを開いてから、名前をつけて保存をするだけで変換が完了します。<br>
+                  x形式のファイルの場合はこれに作業が2つ加わります。<br>
+                  ファイルを開く際に「サイズ調整」という名前のダイアログが現れるので、これはそのままOKを押してください。<br>
+                  名前をつけて保存をする前に、モデル名に適当な名前を入れておいてください。
+                </p>
+                <p>
+                  <img src="resources/7-1.png" alt="モデル名の欄はファイルを開けばすぐに目に入ります。" class="img-rounded">
+                </p>
+              </section>
+              <section>
+                <h4>足跡モデルにほとんど透明な蓋がある場合、蓋を取り除く</h4>
+                <p>
+                  本ツールで街モデルに穴開け改造を行ってしまえば、足跡モデルのほとんど透明な蓋はもはや不要になります。<br>
+                  PmxEditorによる編集で蓋を取り除いてください。<br>
+                  また、これはモデル改造にあたるので、足跡モデル側の利用規約をよく読み、モデル改造が許可されていることを確認してください。
+                </p>
+                <p>
+                  ほとんど透明な蓋を取り除くには、足跡モデルをPmxEditorで開いた後、Pmx編集ウィンドウで材質タブをクリックします。<br>
+                  そして、非透過度が、0.01など0に極端に近い値の材質を探し、もしそのような材質があれば、材質をDeleteキーで削除してください。<br>
+                  材質を削除した後は、保存を忘れずに行ってください。
+                </p>
+                <p>
+                  <img src="resources/7-2.png" alt="非透過度の欄は材質画面の右上にあります。" class="img-rounded">
+                </p>
+              </section>
+              <section>
+                <h4>MMD上で街モデルと足跡モデルを仮に配置する</h4>
+                <p>
+                  この時点で、穴の開いていない街モデルと、ほとんど透明な蓋の無い足跡モデルを用いて、MMD上でそれらを仮に配置してください。<br>
+                  何故ならば、街モデルのどこに穴を開ければよいのかを決めるために、街モデルと足跡モデルの配置情報が必要になるからです。<br>
+                  この時点では、足跡モデルのへこんでいる部分は街モデルの地面に隠れてしまいますが、気にしないでください。
+                </p>
+                <p>
+                  <img src="resources/7-3.png" alt="MMD上でモデルを仮に配置した場面です。" class="img-rounded">
+                </p>
+              </section>
+            </section>
+            <section>
+              <h3>本ツールの使い方</h3>
+              <p>
+                入力する値の説明をします。
+              </p>
+              <section>
+                <h4>ファイル指定</h4>
+                <p>
+                  穴を開けたい街モデルと、ほとんど透明な蓋を取り除いた足跡モデルのpmxファイルを、それぞれ選択してください。
+                </p>
+                <p>
+                  <img src="resources/8-1.png" alt="ファイルを読み込んだ後の場面です。" class="img-rounded">
+                </p>
+              </section>
+              <section>
+                <h4>X/Y/Z/Rx/Ry/Rz</h4>
+                <p>
+                  MMD上で街モデルと足跡モデルの一番上のボーン（「全ての親」や「センター」という名前になっていることが多いと思います）を選択し、それぞれのボーン位置と角度を、本ツールのX/Y/Z/Rx/Ry/Rzに書き写していってください。<br>
+                  本ツールのX/Y/Zはボーン位置のX/Y/Zに対応し、Rx/Ry/Rzは角度のX/Y/Zに対応します。
+                </p>
+                <p>
+                  <img src="resources/8-2.png" alt="足跡モデルのセンターボーンを選択した場面です。" class="img-rounded">
+                </p>
+                <p>
+                  <img src="resources/8-3.png" alt="センターボーンのボーン位置と角度をX/Y/Z/Rx/Ry/Rzに書き写します。" class="img-rounded">
+                </p>
+              </section>
+              <section>
+                <h4>断面の高さY</h4>
+                <p>
+                  断面の高さYは、足跡をつけたい地面の高さを指定します。<br>
+                  もし土手の上などに足跡をつけたい場合、土手の上のY座標を入力します。<br>
+                  （分かる人向けの追加説明: ここでY座標と言っているのは、街モデルのローカル座標系でのY座標です）<br>
+                  大抵の場合、足跡をつけたい地面のY座標は0でしょうから、断面の高さYには0を入力することが多いでしょう。
+                </p>
+                <p>
+                  <img src="resources/8-4.png" alt="断面の高さYを入力した場面です。" class="img-rounded">
+                </p>
+              </section>
+              <section>
+                <h4>消去領域の算出</h4>
+                <p>
+                  ここまでの入力値を設定し終わると、消去領域の算出ボタンを押すことで、街モデルに開ける穴の領域の候補を計算することができます。<br>
+                  穴の領域の候補は次のようなプレビューに表示されます。
+                </p>
+                <p>
+                  <img src="resources/8-5.png" alt="消去領域の算出ボタンを押すと新たにプレビューが現れます。" class="img-rounded">
+                </p>
+              </section>
+              <section>
+                <h4>消去領域について</h4>
+                <p>
+                  足跡モデルが、へこんだ部分の周囲に盛土状の部分を持っているとき、通常、赤線で囲まれた領域と青線で囲まれた領域がプレビューに一つずつ現れます。<br>
+                  通常、赤線が盛土の内側の輪郭を表し、青線が盛土の外側の輪郭を表しています。<br>
+                  イメージとしては次のような感じです。
+                </p>
+                <p>
+                  <img src="resources/8-6.png" alt="盛土と地面が交わる部分は2つあり、小さい方が赤線、大きい方が青線に対応します。" class="img-rounded">
+                </p>
+                <p>
+                  この場合、赤線で囲まれた領域を消すか青線で囲まれた領域を消すか選択することができます。<br>
+                  どちらを選んでも得られる結果はそう大きくは変わりませんが、盛土部分において微妙な違いがあります。<br>
+                  赤線で囲まれた領域を消すと、盛土の内側の輪郭と、最も盛り上がった部分との間にある物体が残ってしまいます。<br>
+                  また、青線で囲まれた領域を消すと、盛土の外側の輪郭と、最も盛り上がった部分との間にある物体が消えてしまいます。<br>
+                  状況に応じて使い分けてください。
+                </p>
+                <table class="table">
+                  <thead><tr>
+                    <th>赤線で囲まれた領域を消すと不都合な場合</th>
+                    <th>青線で囲まれた領域を消すと不都合な場合</th>
+                  </tr></thead>
+                  <tbody><tr>
+                    <td><img src="resources/8-7.png" alt="" class="img-rounded"></td>
+                    <td><img src="resources/8-8.png" alt="足跡モデル型の穴を開けた街モデルです。" class="img-rounded"></td>
+                  </tr></tbody>
+                </table>
+                <p>
+                  足跡モデルの形状や断面の高さYの設定次第では、ここまでの通常の場合の説明と違って、赤線で囲まれた領域と青線で囲まれた領域が一つずつ現れないこともあります。<br>
+                  その場合でも赤線で囲まれた領域を消したり、青線で囲まれた領域を消したりすることはできます。<br>
+                  ただし、本ツールには今のところ、赤線で囲まれた領域を消す場合は、赤線で囲まれた領域は一つでなければならず、青線で囲まれた領域を消す場合は、青線で囲まれた領域は一つでなければならないという制限があります。<br>
+                  例えば、下の画像のような場合は街モデルに穴を開ける処理を実行することはできません。<br>
+                  このときは、断面の高さYを調整するとどうにかなる場合があるので、調整してみてください。
+                </p>
+                <p>
+                  <img src="resources/8-9.png" alt="赤線で囲まれた領域が2個あり、青線で囲まれた領域がありません。" class="img-rounded">
+                </p>
+              </section>
+            </section>
+            <section>
+              <h3>FAQ</h3>
+              <section>
+                <h4>穴開け処理に時間がかかりすぎる</h4>
+                <p>
+                  今のところは我慢してください。<br>
+                  将来、処理を高速化するかもしれません。
+                </p>
+              </section>
+              <section>
+                <h4>動かない</h4>
+                <p>
+                  必須ではありませんが、最新のGoogle Chromeの利用を推奨します。<br>
+                  もしエラーが起こった場合、使用ブラウザとエラーメッセージを<a href="https://twitter.com/aqgts">私のTwitter</a>などに伝えていただけるとありがたいです。<br>
+                  なお、IE9以下に対応する予定はありませんのであしからず。
+                </p>
+              </section>
+              <section>
+                <h4>街モデルに足跡を複数個開けたい</h4>
+                <p>
+                  本ツールを繰り返し使って、足跡を1個ずつ開けていってください。
+                </p>
+              </section>
+              <section>
+                <h4>利用規約は？</h4>
+                <p>
+                  本ツールの利用規約はありません。<br>
+                  街モデルと足跡モデルの利用規約が許す限りにおいて、出力されたモデルをどのような用途に利用しても構いません。<br>
+                  また、本ツール自体の改造も歓迎しています。
+                </p>
+              </section>
+              <section>
+                <h4>赤線で囲まれた領域を消しても青線で囲まれた領域を消しても、盛土部分が不自然になってしまう</h4>
+                <p>
+                  場合によりますが、「赤線と青線の中間の線」があれば問題が解決するようなときがあると思います。<br>
+                  それとほぼ同じことをするには、断面の高さYを、地面よりも高く、かつ盛土の最も盛り上がった部分よりもわずかに低い値にすればよいです。<br>
+                  赤線と青線ができるだけ近くなるように、断面の高さYを徐々に上げていってみてください。
+                </p>
+              </section>
+            </section>
+          </section>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@2.0.5/dist/vue.min.js" integrity="sha384-BQma69dL27IjMQzG7zACulw2zdyzEcQuVEy91v+xybGJHNR9U1gA5gZwzHl3bIHD" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.4/lodash.min.js" integrity="sha384-+VyieUXwWQSImpRIFhlRJNe2KeZblzwXEF8LsYAO/cYlQdDG2SdJaky4Ud0sdVup" crossorigin="anonymous"></script>
+    <script>window.TextEncoder = window.TextDecoder = null;</script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding-indexes.js" integrity="sha384-jWeRIUy7EaXFr9y2w3mAhEyNfcErQLwCwU4aoaPa7RnQW2/hhjhlOKy2k5AWwvNq" crossorigin="anonymous"></script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding.js" integrity="sha384-8ADKk0uZNRtvTx93m1oAfpvp5c/+nqSVWFhhSTntUcN3b+flD1Ljgy0cYuRS9sGk" crossorigin="anonymous"></script>
+    <script src="https://cdn.rawgit.com/YuzuJS/setImmediate/master/setImmediate.js" integrity="sha384-bjAOGfE2ZaQ0x1CrzSv74OxOiYYg2KIp5oKHSnYfjZY2Unk/xly4ZAh3a3O8d/qh" crossorigin="anonymous"></script>
+    <script src="dist/index.main.min.js"></script>
+  </body>
+</html>

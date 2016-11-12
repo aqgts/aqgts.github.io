@@ -1,6 +1,6 @@
 {
   "name": "impact-earthquake",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This tool generates a motion data for MMD, which simulates an earthquake caused by a fall of a heavy object.",
   "scripts": {
     "build": "cp ../shared/src/* src && `npm bin`/babel -d dist src && `npm bin`/browserify dist/index.main.js | `npm bin`/uglifyjs -o dist/index.main.min.js",

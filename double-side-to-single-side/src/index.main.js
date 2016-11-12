@@ -48,7 +48,7 @@ const main = async function (inputFile) {
     const vertex = model.vertices[vertexIndex];
     model.vertices.push(new PMX.Vertex(
       vertex.position,
-      vertex.normal.neg(),
+      vertex.normal.negate(),
       vertex.uv,
       vertex.extraUVs,
       vertex.weight,

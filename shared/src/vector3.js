@@ -7,19 +7,13 @@ export default class Vector3 extends Vector {
   get x() {
     return this[0];
   }
-  set x(value) {
-    this[0] = value;
-  }
   get y() {
     return this[1];
-  }
-  set y(value) {
-    this[1] = value;
   }
   get z() {
     return this[2];
   }
-  set z(value) {
-    this[2] = value;
+  crossProduct(other) {
+    return new this.constructor(this.y * other.z - this.z * other.y, this.z * other.x - this.x * other.z, this.x * other.y - this.y * other.x);
   }
 }
