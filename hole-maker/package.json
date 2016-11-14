@@ -1,6 +1,6 @@
 {
   "name": "hole-maker",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This tools make a hole in the shape of a footprint model in a city model.",
   "scripts": {
     "build": "cp ../shared/src/* src && `npm bin`/babel -d dist src && `npm bin`/browserify dist/index.main.js | `npm bin`/uglifyjs -o dist/index.main.min.js",
