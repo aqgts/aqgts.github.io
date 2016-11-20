@@ -1,5 +1,4 @@
 import Vector2 from "./vector2";
-import Vector3 from "./vector3";
 
 export default class Line2D {
   constructor(a, b, c) {

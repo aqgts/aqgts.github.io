@@ -1,7 +1,7 @@
 {
-  "name": "hole-maker",
-  "version": "1.0.1",
-  "description": "This tools make a hole in the shape of a footprint model in a city model.",
+  "name": "pubic-hair",
+  "version": "0.1.0",
+  "description": "",
   "scripts": {
     "build": "cp ../shared/src/* src && `npm bin`/babel -d dist src && `npm bin`/browserify dist/index.main.js | `npm bin`/uglifyjs -o dist/index.main.min.js",
     "clean": "git clean -X -d -f",
@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/aqgts/aqgts.github.io/issues"
   },
-  "homepage": "https://aqgts.github.io/hole-maker/",
+  "homepage": "https://aqgts.github.io/pubic-hair/",
   "babel": {
     "presets": [
       "es2015",

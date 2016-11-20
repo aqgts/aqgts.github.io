@@ -16,7 +16,7 @@
   "bugs": {
     "url": "https://github.com/aqgts/aqgts.github.io/issues"
   },
-  "homepage": "http://aqgts.github.io/double-side-to-single-side/",
+  "homepage": "https://aqgts.github.io/double-side-to-single-side/",
   "babel": {
     "presets": [
       "es2015",

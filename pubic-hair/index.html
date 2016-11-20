@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>pubic-hair（α版）</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1>public-hair（α版）</h1>
+          <div class="well">
+            <div class="form-group">
+              <label for="n">毛の断面の丸さ（毛の断面を正何角形にするか）</label>
+              <input type="text" size="5" class="form-control" id="n" v-model="n">
+            </div>
+            <div class="form-group">
+              <label for="m">毛の縮れ具合1（毛を曲げる箇所の個数）</label>
+              <input type="text" size="5" class="form-control" id="m" v-model="m">
+            </div>
+            <div class="form-group">
+              <label for="maxDeg">毛の縮れ具合2（毛を曲げる箇所で付く角度の最大値）</label>
+              <input type="text" size="5" class="form-control" id="maxDeg" v-model="maxDeg">
+            </div>
+            <div class="form-group">
+              <label for="width">X方向の毛の本数</label>
+              <input type="text" size="5" class="form-control" id="width" v-model="width">
+            </div>
+            <div class="form-group">
+              <label for="height">Z方向の毛の本数</label>
+              <input type="text" size="5" class="form-control" id="height" v-model="height">
+            </div>
+            <div class="form-group">
+              <label for="red">毛の色の赤成分（0～1）</label>
+              <input type="text" size="5" class="form-control" id="red" v-model="red">
+            </div>
+            <div class="form-group">
+              <label for="green">毛の色の緑成分（0～1）</label>
+              <input type="text" size="5" class="form-control" id="green" v-model="green">
+            </div>
+            <div class="form-group">
+              <label for="blue">毛の色の青成分（0～1）</label>
+              <input type="text" size="5" class="form-control" id="blue" v-model="blue">
+            </div>
+            <div class="form-group">
+              <label for="log">システムからのメッセージ</label>
+              <textarea rows="8" readonly class="form-control" id="log"></textarea>
+            </div>
+            <button class="btn btn-primary" v-bind:disabled="!isLoaded || isProcessing" v-on:click="createModel">モデル生成</button>
+          </div>
+          <section>
+            <h2>説明</h2>
+            <p>以下のような陰毛モデルが作れます。</p>
+            <table class="table">
+              <thead><tr>
+                <th>遠景</th>
+                <th>近景</th>
+              </tr></thead>
+              <tbody><tr>
+                <td><img src="resources/1.png" alt="遠景です。" class="img-rounded" /></td>
+                <td><img src="resources/2.png" alt="近景です。" class="img-rounded" /></td>
+              </tr></tbody>
+            </table>
+            <p>調整をほとんどしていないのであまり陰毛らしくないですがご容赦ください……。</p>
+          </section>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@2.0.5/dist/vue.min.js" integrity="sha384-BQma69dL27IjMQzG7zACulw2zdyzEcQuVEy91v+xybGJHNR9U1gA5gZwzHl3bIHD" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.4/lodash.min.js" integrity="sha384-+VyieUXwWQSImpRIFhlRJNe2KeZblzwXEF8LsYAO/cYlQdDG2SdJaky4Ud0sdVup" crossorigin="anonymous"></script>
+    <script>window.TextEncoder = window.TextDecoder = null;</script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding-indexes.js" integrity="sha384-jWeRIUy7EaXFr9y2w3mAhEyNfcErQLwCwU4aoaPa7RnQW2/hhjhlOKy2k5AWwvNq" crossorigin="anonymous"></script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding.js" integrity="sha384-8ADKk0uZNRtvTx93m1oAfpvp5c/+nqSVWFhhSTntUcN3b+flD1Ljgy0cYuRS9sGk" crossorigin="anonymous"></script>
+    <script src="https://cdn.rawgit.com/YuzuJS/setImmediate/1.0.5/setImmediate.js" integrity="sha384-bjAOGfE2ZaQ0x1CrzSv74OxOiYYg2KIp5oKHSnYfjZY2Unk/xly4ZAh3a3O8d/qh" crossorigin="anonymous"></script>
+    <script src="dist/index.main.min.js"></script>
+  </body>
+</html>
