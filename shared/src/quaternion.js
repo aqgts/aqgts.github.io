@@ -109,7 +109,7 @@ export default class Quaternion {
     const q1 = this.fromToRotation(new Vector3(0, 0, 1), forward);
     const side = upwards.crossProduct(forward);
     const q2 = this.fromToRotation(
-      q1.multiply(new Vector3(0, 1, 0)),
+      q1.rotate(new Vector3(0, 1, 0)),
       side.norm() < 0.0001 ? new Vector3(0, 0, -1) : forward.crossProduct(side.normalize())
     );
     return q2.multiply(q1);

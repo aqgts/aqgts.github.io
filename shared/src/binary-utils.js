@@ -1,5 +1,5 @@
 export default {
-  getBinaryFromFileAsync(inputFile) {
+  readBinaryFromFileAsync(inputFile) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = event => {
