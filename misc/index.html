@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>misc</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12">
+          <h1>misc</h1>
+          <p>自分用の雑多なスクリプト置き場。</p>
+          <section id="panorama360_motion">
+            <h2>panorama360-motion</h2>
+            <div class="well">
+              <div class="form-inline">
+                <div class="form-group">
+                  <label for="panorama360_motion_x">X</label>
+                  <input type="text" size="5" class="form-control" id="panorama360_motion_x" v-model="x">
+                </div>
+                <div class="form-group">
+                  <label for="panorama360_motion_y">Y</label>
+                  <input type="text" size="5" class="form-control" id="panorama360_motion_y" v-model="y">
+                </div>
+                <div class="form-group">
+                  <label for="panorama360_motion_z">Z</label>
+                  <input type="text" size="5" class="form-control" id="panorama360_motion_z" v-model="z">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="panorama360_motion_log">システムからのメッセージ</label>
+                <textarea rows="8" readonly class="form-control" id="panorama360_motion_log"></textarea>
+              </div>
+              <button class="btn btn-primary" v-bind:disabled="isLoading || isProcessing" v-on:click="createMotion">VMD生成</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@2.0.5/dist/vue.min.js" integrity="sha384-BQma69dL27IjMQzG7zACulw2zdyzEcQuVEy91v+xybGJHNR9U1gA5gZwzHl3bIHD" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.4/lodash.min.js" integrity="sha384-+VyieUXwWQSImpRIFhlRJNe2KeZblzwXEF8LsYAO/cYlQdDG2SdJaky4Ud0sdVup" crossorigin="anonymous"></script>
+    <script>window.TextEncoder = window.TextDecoder = null;</script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding-indexes.js" integrity="sha384-jWeRIUy7EaXFr9y2w3mAhEyNfcErQLwCwU4aoaPa7RnQW2/hhjhlOKy2k5AWwvNq" crossorigin="anonymous"></script>
+    <script src="https://cdn.rawgit.com/inexorabletash/text-encoding/v0.6.1/lib/encoding.js" integrity="sha384-8ADKk0uZNRtvTx93m1oAfpvp5c/+nqSVWFhhSTntUcN3b+flD1Ljgy0cYuRS9sGk" crossorigin="anonymous"></script>
+    <script src="https://cdn.rawgit.com/YuzuJS/setImmediate/1.0.5/setImmediate.js" integrity="sha384-bjAOGfE2ZaQ0x1CrzSv74OxOiYYg2KIp5oKHSnYfjZY2Unk/xly4ZAh3a3O8d/qh" crossorigin="anonymous"></script>
+    <script src="dist/index.main.min.js"></script>
+  </body>
+</html>
