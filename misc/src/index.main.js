@@ -40,9 +40,9 @@ import TextAreaWrapper from "./text-area-wrapper";
           const motion = new VMD(VMD.CAMERA_MODEL_NAME, {
             bone: [],
             morph: [],
-            camera: new Array(9 * 18).fill().map((_, frameNumber) => {
-              const yaw = frameNumber % 18 * 20 * Math.PI / 180;
-              const pitch = (Math.floor(frameNumber / 18) * 20 - 80) * Math.PI / 180;
+            camera: new Array(6 * 12).fill().map((_, frameNumber) => {
+              const yaw = frameNumber % 12 * 30 * Math.PI / 180;
+              const pitch = (Math.floor(frameNumber / 12) * 30 - 75) * Math.PI / 180;
               return new VMD.CameraKeyFrame(
                 frameNumber,
                 0,
