@@ -29,6 +29,18 @@
                   <label for="panorama360_motion_z">Z</label>
                   <input type="text" size="5" class="form-control" id="panorama360_motion_z" v-model="z">
                 </div>
+                <div class="form-group">
+                  <label for="panorama360_motion_unit_degree">角度</label>
+                  <select class="form-control" id="panorama360_motion_unit_degree" v-model="unitDegree">
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="15">15</option>
+                    <option value="18">18</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                  </select>°刻みで撮影
+                </div>
               </div>
               <div class="form-group">
                 <label for="panorama360_motion_log">システムからのメッセージ</label>

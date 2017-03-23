@@ -19,6 +19,7 @@ import TextAreaWrapper from "./text-area-wrapper";
       x: "0",
       y: "0",
       z: "0",
+      unitDegree: "30",
       isLoading: true,
       isProcessing: false
     },
@@ -30,6 +31,18 @@ import TextAreaWrapper from "./text-area-wrapper";
         try {
           log.clear();
   
+          const unitDegree = Number(this.unitDegree);
+          const unitRadian = unitDegree * Math.PI / 180;
+          const yawCount = 360 / unitDegree;
+          const pitchCount = 180 / unitDegree;
+          const angleOfView = (function bisection(min, max) {
+            const x = (min + max) / 2;
+            if (x === min || x === max) return x;
+            const value = Math.sin(x - unitRadian) * Math.cos(x / 2) - 0.3 * Math.cos(x / 2 - unitRadian) * Math.sin(x);
+            if (value < 0) return bisection(x, max);
+            if (value > 0) return bisection(min, x);
+            if (value === 0) return x;
+          })(0, Math.PI);
           const linearBezier = new BezierCurve(
             new Vector2(0, 0),
             new Vector2(20 / 127, 20 / 127),
@@ -40,9 +53,9 @@ import TextAreaWrapper from "./text-area-wrapper";
           const motion = new VMD(VMD.CAMERA_MODEL_NAME, {
             bone: [],
             morph: [],
-            camera: new Array(6 * 12).fill().map((_, frameNumber) => {
-              const yaw = frameNumber % 12 * 30 * Math.PI / 180;
-              const pitch = (Math.floor(frameNumber / 12) * 30 - 75) * Math.PI / 180;
+            camera: new Array(yawCount * pitchCount).fill().map((_, frameNumber) => {
+              const yaw = frameNumber % yawCount * unitRadian;
+              const pitch = Math.floor(frameNumber / yawCount) * unitRadian - (Math.PI / 2 - unitRadian / 2);
               return new VMD.CameraKeyFrame(
                 frameNumber,
                 0,
@@ -56,7 +69,7 @@ import TextAreaWrapper from "./text-area-wrapper";
                   distance: linearBezier,
                   angleOfView: linearBezier
                 },
-                60 * Math.PI / 180,
+                angleOfView,
                 true
               );
             }),
