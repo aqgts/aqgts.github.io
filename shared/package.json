@@ -1,6 +1,6 @@
 {
   "name": "aqgts-shared",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Shared files for all my applications.",
   "scripts": {
     "build": "find .. -mindepth 1 -maxdepth 1 -type d '!' -name shared | xargs -I{} bash -c 'cd {} && if [ -f package.json ]; then npm run build; fi'",

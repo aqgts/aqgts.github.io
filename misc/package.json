@@ -1,6 +1,6 @@
 {
   "name": "misc",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "scripts": {
     "build": "cp ../shared/src/* src && `npm bin`/babel -d dist src && `npm bin`/browserify dist/index.main.js | `npm bin`/uglifyjs -o dist/index.main.min.js",

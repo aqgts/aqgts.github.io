@@ -46,8 +46,6 @@ export default {
         : new DirectedLineSegment2D(new Vector2(newPoints[0].x, newPoints[0].z), new Vector2(newPoints[1].x, newPoints[1].z))];
     }).map(lineSegment => [Array.from(lineSegment.p1).map(v => Math.fround(v)).toString(), [lineSegment]]);
     const curvePartMap = new Map(protoCurvePartMap);
-// global.curvePartMap = curvePartMap;
-// global.originalCurvePartMap = new Map(Array.from(curvePartMap));
     if (curvePartMap.size < protoCurvePartMap.length) throw new Error("Duplicate vertices were found.");
 
     const polygons = [];
@@ -334,6 +332,123 @@ export default {
         const projectedPoint = new Vector2(point.x, point.z);
         return algorithm4(projectedPoint);
       }
+    }
+  },
+  calcMetaMaterials(model) {
+    return model.materials.reduce((array, material, i) => {
+      const firstFaceIndex = array.length === 0 ? 0 : _(_(array).last().faceIndices).last() + 1;
+      const faceIndices = _.range(firstFaceIndex, firstFaceIndex + material.faceCount);
+      array.push({
+        material: material,
+        materialIndex: i,
+        faceIndices: faceIndices,
+        faces: faceIndices.map(i => model.faces[i])
+      });
+      return array;
+    }, []);
+  },
+  createCombinedVertex(model, metaVertexIndices) {
+    const vertexIndices = metaVertexIndices.map(({vertexIndex}) => vertexIndex);
+    const vertices = vertexIndices.map(i => model.vertices[i]);
+    if (vertices.some(vertex => vertex.weight instanceof PMX.Vertex.Weight.SDEF)) {
+      throw new Error(`Combining vertices (${vertexIndices.join(", ")}) failed: SDEF not supported.`);
+    }
+    const boneIndexSet = new Set(_(vertices).flatMap(vertex => vertex.weight.bones).value().filter(bone => bone.weight > 0).map(bone => bone.index));
+    if (boneIndexSet.size > 4) {
+      throw new Error(`Combining vertices (${vertexIndices.join(", ")}) failed: combining needs BDEF${boneIndexSet.size}.`);
+    }
+    let weightMap = new Map(Array.from(boneIndexSet).map(i => [i, 0]));
+    for (const {vertexIndex, blendRate} of metaVertexIndices) {
+      weightMap = model.vertices[vertexIndex].weight.bones.filter(bone => bone.weight > 0).reduce(
+        (map, bone) => map.set(bone.index, map.get(bone.index) + bone.weight * blendRate),
+        weightMap
+      );
+    }
+    let weight;
+    switch (boneIndexSet.size) {
+    case 1:
+    case 2:
+    case 4:
+      weight = new PMX.Vertex.Weight[`BDEF${boneIndexSet.size}`](
+        Array.from(weightMap).map(([index, weight]) => ({index: index, weight: weight}))
+      );
+      break;
+    case 3:
+      let dummyBoneIndex;
+      if (!boneIndexSet.has(0)) {
+        dummyBoneIndex = 0;
+      } else if (!boneIndexSet.has(1)) {
+        dummyBoneIndex = 1;
+      } else if (!boneIndexSet.has(2)) {
+        dummyBoneIndex = 2;
+      } else if (model.bones.length > 3) {
+        dummyBoneIndex = 3;
+      } else {
+        throw new Error(`Combining vertices (${vertexIndices.join(", ")}) failed: could not determine dummy bone index.`);
+      }
+      weight = new PMX.Vertex.Weight.BDEF4(
+        Array.from(weightMap).map(([index, weight]) => ({index: index, weight: weight})).concat([{index: dummyBoneIndex, weight: 0}])
+      );
+      break;
+    }
+    function slerp(scalars, blendRates) {
+      return _.zip(scalars, blendRates).map(([scalar, blendRate]) => scalar * blendRate).reduce((sum, x) => sum + x);
+    }
+    function vlerp(vectors, blendRates) {
+      return _.zip(vectors, blendRates).map(([vector, blendRate]) => vector.multiply(blendRate)).reduce((sum, v) => sum.add(v));
+    }
+    const blendRates = metaVertexIndices.map(({blendRate}) => blendRate);
+    return new PMX.Vertex(
+      vlerp(vertices.map(vertex => vertex.position), blendRates),
+      vlerp(vertices.map(vertex => vertex.normal), blendRates).normalize(),
+      vlerp(vertices.map(vertex => vertex.uv), blendRates),
+      _.zip(...vertices.map(vertex => vertex.extraUVs)).map(uvs => vlerp(uvs.map(uv => new Vector2(uv.x % 1, uv.y % 1)), blendRates)),
+      weight,
+      slerp(vertices.map(vertex => vertex.edgeSizeRate), blendRates)
+    );
+  },
+  combineVertices(model, metaBaseVertexIndex, metaVertexIndices) {
+    metaBaseVertexIndex = Object.assign({}, metaBaseVertexIndex);
+    metaVertexIndices = metaVertexIndices.map(metaVertexIndex => Object.assign({}, metaVertexIndex));
+
+    model.vertices[metaBaseVertexIndex.vertexIndex] = this.createCombinedVertex(model, [metaBaseVertexIndex].concat(metaVertexIndices));
+
+    const targetMorphTypes = new Set(["vertex", "uv", "extraUV1", "extraUV2", "extraUV3", "extraUV4"]);
+    const vertexInFaceMap = new Map(new Array(model.vertices.length).fill().map((_, i) => [i, []]));
+    for (const face of model.faces) {
+      for (let i = 0; i < face.vertexIndices.length; i++) {
+        vertexInFaceMap.get(face.vertexIndices[i]).push({face: face, order: i});
+      }
+    }
+    const offsetMap = new Map(new Array(model.vertices.length).fill().map((_, i) => [i, []]));
+    for (const morph of model.morphs.filter(morph => targetMorphTypes.has(morph.type))) {
+      for (const offset of morph.offsets) {
+        offsetMap.get(offset.vertexIndex).push(offset);
+      }
+    }
+    function overwriteVertexIndex(from, to) {
+      for (const {face, order} of vertexInFaceMap.get(from)) {
+        face.vertexIndices[order] = to;
+      }
+      for (const offset of offsetMap.get(from)) {
+        offset.vertexIndex = to;
+      }
+    }
+
+    for (let i = 0; i < metaVertexIndices.length; i++) {
+      overwriteVertexIndex(metaVertexIndices[i].vertexIndex, metaBaseVertexIndex.vertexIndex);
+      for (let j = metaVertexIndices[i].vertexIndex; j < model.vertices.length - 1; j++) {
+        overwriteVertexIndex(j + 1, j);
+      }
+      if (metaBaseVertexIndex.vertexIndex > metaVertexIndices[i].vertexIndex) {
+        metaBaseVertexIndex.vertexIndex--;
+      }
+      for (let j = i + 1; j < metaVertexIndices.length; j++) {
+        if (metaVertexIndices[j].vertexIndex > metaVertexIndices[i].vertexIndex) {
+          metaVertexIndices[j].vertexIndex--;
+        }
+      }
+      model.vertices.splice(metaVertexIndices[i].vertexIndex, 1);
     }
   }
 };
